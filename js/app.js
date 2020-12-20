@@ -2,6 +2,11 @@ const resultado = document.querySelector('#resultado');
 const form = document.querySelector('#formulario');
 const paginacion = document.querySelector('#paginacion');
 
+const registrosPorPagina = 40;
+let totalPaginas;
+let iterador;
+let paginaActual = 1;
+
 
 
 
@@ -21,7 +26,7 @@ function validarFormulario(e) {
         return;
     }
 
-    buscarImagenes(termino);
+    buscarImagenes();
 }
 
 function mostrarAlerta(mensaje) {
@@ -43,15 +48,30 @@ function mostrarAlerta(mensaje) {
     }
 }
 
-function buscarImagenes(termino) {
+function buscarImagenes() {
+
+    const termino = document.querySelector('#termino').value;
     const key = '19595154-eb84613674097caafa293bf2a';
-    const url = `https://pixabay.com/api/?key=${key}&q=${termino}`;
+    const url = `https://pixabay.com/api/?key=${key}&q=${termino}&per_page=${registrosPorPagina}&page=${paginaActual}`;
 
     fetch(url)
         .then(response => response.json())
         .then(data => {
+            totalPaginas = calcularPaginas(data.totalHits);
+            console.log(totalPaginas);
             mostrarImagenes(data.hits);
         });
+}
+
+//? Generador que registrara la cantidad de lementos deacuerdo a las paginas
+function* crearPaginador(total) {
+    for (let i = 1; i <= total; i++) {
+        yield i;
+    }
+}
+
+function calcularPaginas(total) {
+    return parseInt(Math.ceil(total / registrosPorPagina));
 }
 
 function mostrarImagenes(imagenes) {
@@ -61,7 +81,6 @@ function mostrarImagenes(imagenes) {
 
     imagenes.forEach(imagen => {
         const { previewURL, likes, views, largeImageURL } = imagen;
-        console.log(previewURL);
         resultado.innerHTML += `
             <div class="w-1/2 md:w-1/3 lg:w-1/4 p-3 mb-4">
                 <div class="bg-white">
@@ -76,4 +95,33 @@ function mostrarImagenes(imagenes) {
             </div>
             `;
     });
+
+    while (paginacion.firstChild) {
+        paginacion.removeChild(paginacion.firstChild);
+    }
+    imprimirPaginador();
+}
+
+function imprimirPaginador() {
+    iterador = crearPaginador(totalPaginas);
+    while (true) {
+        const { value, done } = iterador.next();
+
+        if (done) return;
+        //? Caso contrario genera un boton por cada elemento
+
+        const boton = document.createElement('a');
+        boton.href = '#';
+        boton.dataset.pagina = value;
+        boton.textContent = value;
+
+        boton.classList.add('siguiente', 'bg-yellow-400', 'px-4', 'py-1', 'mr-2', 'font-bold', 'mb-10', 'uppercase', 'rounded');
+
+        boton.onclick = () => {
+            paginaActual = value;
+            buscarImagenes();
+        }
+
+        paginacion.appendChild(boton);
+    }
 }
