@@ -68,6 +68,9 @@ function mostrarImagenes(imagenes) {
                     <img class="w-full" src="${previewURL}">
                     <div class="p-4">
                     <p class="font-bold">${likes} <span class="font-light">Me gusta</span> </p>
+                    <p class="font-bold">${views} <span class="font-light">veces vista</span> </p>
+                    <a class=" block w-full bg-blue-800 hover:bg-blue-500 text-white uppercase font-bold text-center rounded mt-5 p-1" 
+                       href="${largeImageURL}" target="_blank" rel="noopener noreferrer"> Ver imagen <a>
                     </div>
                 </div>
             </div>
